@@ -64,20 +64,44 @@ export default function App() {
   };
 
   const handleRandomFill = (count) => {
-    const clients = getClients();
+    const clientsList = getClients();
+    if (!clientsList || clientsList.length === 0) {
+      alert("Nessun cliente nel database!");
+      return;
+    }
+    
     const availableDays = days.filter(d => !d.isWeekend && !d.isHoliday);
     
-    // Shuffle available days
+    // Shuffle available days and pick 'count' days
     const shuffledDays = [...availableDays].sort(() => 0.5 - Math.random());
     const daysToFill = shuffledDays.slice(0, Math.min(count, shuffledDays.length));
     
+    // Sort selected days chronologically to space out duplicates
+    daysToFill.sort((a, b) => a.dayNumber - b.dayNumber);
+    
+    // Create a pool of clients prioritizing uniqueness
+    let clientPool = [];
+    let tempClients = [...clientsList].sort(() => 0.5 - Math.random());
+    
+    while (clientPool.length < daysToFill.length) {
+      // Prevent back-to-back same client at the boundary of reshuffling
+      if (clientPool.length > 0 && tempClients.length > 1 && tempClients[0].id === clientPool[clientPool.length - 1].id) {
+        const temp = tempClients[0];
+        tempClients[0] = tempClients[1];
+        tempClients[1] = temp;
+      }
+      
+      clientPool = clientPool.concat(tempClients);
+      tempClients = [...clientsList].sort(() => 0.5 - Math.random());
+    }
+    
     const newTrips = { ...trips };
-    daysToFill.forEach(day => {
-      const randomClient = clients[Math.floor(Math.random() * clients.length)];
+    daysToFill.forEach((day, index) => {
+      const assignedClient = clientPool[index];
       newTrips[day.dayNumber] = {
-        nome: randomClient.nome,
-        citta: randomClient.citta,
-        provincia: randomClient.provincia,
+        nome: assignedClient.nome,
+        citta: assignedClient.citta,
+        provincia: assignedClient.provincia,
         km: 0,
         type: 'trip'
       };
