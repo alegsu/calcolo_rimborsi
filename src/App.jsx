@@ -6,6 +6,8 @@ import TripModal from './components/TripModal';
 import BackendPanel from './components/BackendPanel';
 import { toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
+import firmaAle from './assets/signatures/Firma_Ale.png';
+import firmaCarlo from './assets/signatures/Firma_Carlo.png';
 
 const FORFETTARIO = 46.48;
 const TARIFFA_KM = 0.3574;
@@ -36,7 +38,7 @@ export default function App() {
     if (savedSig) setCustomSignature(savedSig);
   }, []);
 
-  const defaultSignature = admin === 'ALESSANDRO GARBUIO' ? '/signatures/Firma_Ale.png' : '/signatures/Firma_Carlo.png';
+  const defaultSignature = admin === 'ALESSANDRO GARBUIO' ? firmaAle : firmaCarlo;
   const effectiveSignature = customSignature || defaultSignature;
 
   const handleSignatureUpload = (dataUrl) => {
