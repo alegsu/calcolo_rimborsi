@@ -103,10 +103,22 @@ export default function App() {
       });
       
       const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      let finalWidth = pageWidth;
+      let finalHeight = (imgProps.height * pageWidth) / imgProps.width;
+      
+      // Se l'altezza supera quella della pagina A4, scaliamo in base all'altezza per farci stare tutto
+      if (finalHeight > pageHeight) {
+        finalHeight = pageHeight;
+        finalWidth = (imgProps.width * pageHeight) / imgProps.height;
+      }
+      
+      // Centriamo orizzontalmente in caso sia stato scalato
+      const xOffset = (pageWidth - finalWidth) / 2;
+      
+      pdf.addImage(dataUrl, 'JPEG', xOffset, 0, finalWidth, finalHeight);
       
       const fileName = `Rimborso_${months[selectedMonth]}_${selectedYear}_${admin.replace(/ /g, '_')}.pdf`;
       pdf.save(fileName);
